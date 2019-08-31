@@ -290,4 +290,4 @@ def cool_room(m_flowrate,duration,volumn_room,temp_airOut, temp_room):
     Final_temp = ( volumn_room*density*heat_capacity_air*temp_room +m_flowrate*duration*heat_capacity_air*temp_airOut ) / (volumn_room*density*heat_capacity_air + m_flowrate*duration*heat_capacity_air)
     return Final_temp
   
-simulateTimeBasedCooling(110,2,900,53.11904,293,308,0.024,*initialCondition)
+simulateTimeBasedCooling(110,2,900,53.11904,293,308,0.024,10,1,308,308,308,0.024,293,0.026,0.5,0.05,0.027,2.26e6 ,0.03,91.6e-5,1007,12,10)
