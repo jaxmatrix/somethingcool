@@ -65,8 +65,8 @@ def update_temperature_productAir(self,argv):
     c_productAir = argv[5]
     T_productAir = self
 
-    return ( -1. * (h_heat*dx*b*(T_productAi - T_water)) + (m_productAir*c_productAir*T_productAir) ) / ( m_productAir*c_productAir )
-    #return ( -1. * (h_heat*dx*b*(T_workingAir_wet - T_water)) + (m_productAir*c_productAir*T_productAir) ) / ( m_productAir*c_productAir )
+    #return ( -1. * (h_heat*dx*b*(T_productAi - T_water)) + (m_productAir*c_productAir*T_productAir) ) / ( m_productAir*c_productAir )
+    return ( -1. * (h_heat*dx*b*(T_productAir - T_water)) + (m_productAir*c_productAir*T_productAir) ) / ( m_productAir*c_productAir )
 
 
 def update_temperature_workingAir_dry(self,argv):
@@ -94,8 +94,9 @@ def update_absoluteHumidity_workingAir_wet(self,argv):
     w_saturated_wet = argv[3]
     m_workingAir_wet = argv[4]
     w_workingAir_wet = self
+    iv = argv[5]
 #    print(argv)
-    return ( h_mass*dx*b*(w_saturated_wet - w_workingAir_wet) + (m_workingAir_wet*w_workingAir_wet)  ) / ( m_workingAir_wet )
+    return ( iv*h_mass*dx*b*(w_saturated_wet - w_workingAir_wet) + (m_workingAir_wet*w_workingAir_wet)  ) / ( m_workingAir_wet )
 
 def update_temperature_workingAir_wet(self,argv):
     #argv update temperature workingAir wet",argv)
@@ -184,10 +185,11 @@ def simulate(steps,convergence_factor,initalCondition):
     c_water = initalCondition[13]
     m_water = dx*b*0.003*1000
 
+
     for n in range(steps):
 
         m_productAir = 91.6*0.00001
-        T_productAir_argumentList = ( h_heat,dx,b,T_workingAir_wet[n],m_productAir,c_productAir )
+        T_productAir_argumentList = ( h_heat,dx,b,T_water[n],m_productAir,c_productAir )
         T_productAir_update = waitForConvergence(convergence_factor,update_temperature_productAir,T_productAir[n],T_productAir_argumentList,0)
         T_productAir.append(T_productAir_update[0])
   #      print("Debugging T product air",T_productAir,T_water)
@@ -198,9 +200,10 @@ def simulate(steps,convergence_factor,initalCondition):
 
         #Calculate m_workingAir_wet
 
-        w_workingAir_wet_argumentList = (h_heat,dx,b,w_saturated_wet,m_workingAir_wet)
+        w_workingAir_wet_argumentList = (h_heat,dx,b,w_saturated_wet,m_workingAir_wet,iv)
         w_workingAir_wet_update = waitForConvergence(convergence_factor,update_absoluteHumidity_workingAir_wet,w_workingAir_wet[n],w_workingAir_wet_argumentList,0)
         w_workingAir_wet.append(w_workingAir_wet_update[0])
+
  #       print ("W_wa_wet",w_workingAir_wet,n)
         m_workingAir_wet = m_workingAir_wet +((w_saturated_wet - w_workingAir_wet[n+1])*dx*0.05*0.005)
 
@@ -214,6 +217,7 @@ def simulate(steps,convergence_factor,initalCondition):
         T_water_update = waitForConvergence(convergence_factor,update_temperature_water,T_water[n],T_water_argumentList,0)
         T_water.append(T_water_update[0])
         m_water = m_water +((w_saturated_wet - w_workingAir_wet[n+1])*dx*0.05*0.005)
+
     print("Base Line simulation : m_water", m_water)
 
     return T_productAir,T_workingAir_dry,T_workingAir_wet,w_workingAir_wet,T_water,m_productAir
@@ -310,7 +314,6 @@ x = simulate(100,0.01,(308,308,308,0.024,293,0.026,0.5,0.05,0.027,2.26e6 ,0.03,9
 '''
 
 print(x)
-
 
 # Make graphs
 
